@@ -108,10 +108,14 @@ type Options struct {
 	// CenterLevel centers the level name within the width reserved for all
 	// configured levels. When false, level names are left-aligned.
 	CenterLevel bool
-	Tags        TagOptions
-	Mask        MaskOptions
-	Formatter   Formatter // nil selects ModernEmojiFormatter
-	ExitFunc    func(int) // defaults to os.Exit; useful for tests
+	// DisableAutoMasking prevents sensitive field names such as password and
+	// token from being masked automatically. Explicit Mask, MaskKeepLast, and
+	// MaskJSON calls remain active.
+	DisableAutoMasking bool
+	Tags               TagOptions
+	Mask               MaskOptions
+	Formatter          Formatter // nil selects ModernEmojiFormatter
+	ExitFunc           func(int) // defaults to os.Exit; useful for tests
 }
 
 // Event is a safe, normalized and redacted snapshot passed to formatters.

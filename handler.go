@@ -145,7 +145,8 @@ func (h *handler) Handle(ctx context.Context, record slog.Record) error {
 	sort.Strings(keys)
 	safeFields := make([]Field, 0, len(keys))
 	for _, key := range keys {
-		safeFields = append(safeFields, Field{Key: key, Value: redactField(key, merged[key], opts.Mask)})
+		value := redactField(key, merged[key], opts.Mask, !opts.DisableAutoMasking)
+		safeFields = append(safeFields, Field{Key: key, Value: value})
 	}
 
 	evt := Event{

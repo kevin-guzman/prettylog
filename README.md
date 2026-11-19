@@ -218,6 +218,18 @@ structure under `JSONFormatter`. Secrets with four characters or fewer are
 fully masked. Wrappers cannot prevent leaks when sensitive data is written
 directly into the message; use structured fields instead.
 
+Automatic masking is enabled by default. Disable it in the constructor when
+field values must be emitted unchanged:
+
+```go
+log := prettylog.MustNew(prettylog.Options{
+    DisableAutoMasking: true,
+})
+```
+
+This setting affects only automatic masking based on sensitive field names.
+Explicit calls to `Mask`, `MaskKeepLast`, and `MaskJSON` continue to mask data.
+
 `SanitizeControl` escapes newlines, tabs, ESC, and other control characters by
 default:
 

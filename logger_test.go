@@ -237,6 +237,36 @@ func TestMaskingAndShortSecrets(t *testing.T) {
 	}
 }
 
+func TestDisableAutoMaskingKeepsExplicitMasking(t *testing.T) {
+	l, out := newTestLog(t, Options{DisableAutoMasking: true})
+	l.WithField("password", "visible-secret").Info("automatic masking disabled")
+	l.WithField("token", l.Mask("explicit-secret")).Info("explicit masking")
+
+	got := out.String()
+	if !strings.Contains(got, "[password:visible-secret]") {
+		t.Fatalf("sensitive field was still automatically masked: %q", got)
+	}
+	if strings.Contains(got, "explicit-secret") || !strings.Contains(got, "[token:***********cret]") {
+		t.Fatalf("explicit masking did not remain active: %q", got)
+	}
+}
+
+func TestDisableAutoMaskingStillNormalizesErrors(t *testing.T) {
+	l, out := newTestLog(t, Options{
+		DisableAutoMasking: true,
+		Formatter:          JSONFormatter{},
+	})
+	l.WithError(errors.New("connection failed")).Error("request failed")
+
+	var record map[string]any
+	if err := json.Unmarshal(out.Bytes(), &record); err != nil {
+		t.Fatal(err)
+	}
+	if record["error"] != "connection failed" {
+		t.Fatalf("error was not normalized: %#v", record)
+	}
+}
+
 func TestMaskJSONDeepRedaction(t *testing.T) {
 	l, out := newTestLog(t, Options{Mask: MaskOptions{VisibleEnd: 4, Character: '*', SensitiveKeys: []string{"pin"}}, Formatter: JSONFormatter{}})
 	secret := `{"token":"topsecret123", "profile":{"password":"abcdefg", "name":"Ana"},"items":[{"pin":"555555","id":2}]}`

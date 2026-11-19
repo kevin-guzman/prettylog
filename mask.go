@@ -125,8 +125,8 @@ func isSensitiveKey(key string, cfg MaskOptions) bool {
 	return false
 }
 
-func redactField(key string, value any, cfg MaskOptions) any {
-	if isSensitiveKey(key, cfg) {
+func redactField(key string, value any, cfg MaskOptions, autoMask bool) any {
+	if autoMask && isSensitiveKey(key, cfg) {
 		return MaskedValue{safe: maskString(fieldString(value), cfg)}
 	}
 	switch v := value.(type) {
